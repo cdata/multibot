@@ -44,16 +44,23 @@ class SkypeBridge:
 
     def receiveSkypeMessage(self, message, status):
 
-        self.sendBridgeMessage({"body" : message.body, "sender" : { "handler" : message.Sender.Handler, "name" : message.Sender.FullName }, "chatName" : message.ChatName })
+        if message.Sender != self.skype.CurrentUser:
+            self.sendBridgeMessage({"body" : message.Body, "sender" : { "handle" : message.Sender.Handle, "name" : message.Sender.FullName }, "chatName" : message.ChatName })
 
-    def sendSkypeMessage(chatName, message):
+    def sendSkypeMessage(self, chatName, message):
+
+        log("Sending message to Skype chat " + chatName)
 
         self.lookupChat(chatName).SendMessage(message)
 
     def receiveBridgeMessage(self, socket, message):
 
-        data = json.loads(message).data
-        self.sendSkypeMessage(data.chatName, data.body)
+        log("Handling message received from bridge.");
+
+        def handleData(message):
+            self.sendSkypeMessage(message['chatName'], message['body'])
+            
+        json.loads(message, object_hook=handleData)
 
     def sendBridgeMessage(self, message):
 
