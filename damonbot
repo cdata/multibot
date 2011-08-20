@@ -1,0 +1,3 @@
+#!/usr/bin/env node
+var damonbot = require('./lib');
+damonbot.run();

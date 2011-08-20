@@ -1,0 +1,15 @@
+{
+  "author": "Christopher Joel <chris@cloudflare.com> (http://www.cloudflare.com)",
+  "name": "damonbot",
+  "description": "Damonbot is a Skype chatbot",
+  "version": "0.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/cdata/damonbot.git"
+  },
+  "engines": {
+    "node": "~v0.4.11"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
