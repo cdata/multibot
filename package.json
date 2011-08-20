@@ -8,7 +8,7 @@
     "url": "git://github.com/cdata/damonbot.git"
   },
   "engines": {
-    "node": "~v0.4.11"
+    "node": "~0.4.10"
   },
   "dependencies": {},
   "devDependencies": {}

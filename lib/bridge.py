@@ -5,53 +5,115 @@ import websocket
 import json
 import sys
 
-skype = Skype4Py.Skype()
-chatCache = {}
-
 def log(message):
-    sys.stdout.write('[ PYTHON ] ' + message)
-    sys.stdout.flush()
+    sys.stdout.write('[ PYTHON ] ' + message + '\n');
+    sys.stdout.flush();
 
-def socketError(socket, error):
-    log(error)
+class SkypeBridge:
 
-def socketOpen(socket):
+    def __init__(self):
+        log('Initializing Skype bridge..');
 
-    log("Socket connected!")
+        self.skype = Skype4Py.Skype()
+        self.connect()
 
-    skype.OnMessageStatus = parseSkypeMessage
-    skype.Attach()
+    def connect(self):
+        try:
+            socket = websocket.WebSocketApp("ws://localhost:1337", on_message = self.receiveBridgeMessage, on_error = self.socketError, on_close = self.socketClose)
+        except:
+            log("Failed to make websocket connection!")
+            raise
 
-    log("Damonbot is listening attentively..")
+        self.socket = socket
 
-def parseSkypeMessage(message, status):
-    chatCache[message.ChatName] = message.Chat
-    socketSend(json.dumps({"body": message.Body, "sender" : { "handle": message.Sender.Handle, "name": message.Sender.FullName }, "chatName": message.ChatName}))
+        socket.on_open = self.socketOpen
+        socket.run_forever()
 
-def socketSend(message):
-    socket.send(json.dumps(message))
+    def socketError(self, socket, error):
+        log(error)
 
-def socketClose(socket):
-    log("Socket closed!")
+    def socketOpen(self, socket):
+        
+        log("Bridge connected!")
+        self.skype.OnMessageStatus = self.receiveSkypeMessage
+        self.skype.Attach()
+        log("Skype client attached!")
 
-def socketMessage(socket, message):
-    parsed = json.loads(message, object_hook=parseNodeMessage)
+    def socketClose(self, socket):
+        log("Bridge closed!")
 
-def parseNodeMessage(message):
+    def receiveSkypeMessage(self, message, status):
 
-    log("Handling a command from the server: ")
+        self.sendBridgeMessage({"body" : message.body, "sender" : { "handler" : message.Sender.Handler, "name" : message.Sender.FullName }, "chatName" : message.ChatName })
 
-    #chatName = message.chatName
-    #chat = chatCache[chatName]
-    #chat.SendMessage(message.body)
+    def sendSkypeMessage(chatName, message):
+
+        self.lookupChat(chatName).SendMessage(message)
+
+    def receiveBridgeMessage(self, socket, message):
+
+        data = json.loads(message).data
+        self.sendSkypeMessage(data.chatName, data.body)
+
+    def sendBridgeMessage(self, message):
+
+        self.socket.send(json.dumps(message))
+
+    def lookupChat(self, chatName):
+
+        for chat in self.skype.Chats:
+            if chat.Name == chatName:
+                return chat
+
+bridge = SkypeBridge()
 
 
-try:
-    socket = websocket.WebSocketApp("ws://localhost:1337", on_message = socketMessage, on_error = socketError, on_close = socketClose)
-except:
-    log("Failed to make websocket connection!")
-    raise
+#skype = Skype4Py.Skype()
+#chatCache = {}
 
-socket.on_open = socketOpen
-socket.run_forever()
+#def log(message):
+    #sys.stdout.write('[ PYTHON ] ' + message)
+    #sys.stdout.flush()
+
+#def socketError(socket, error):
+    #log(error)
+
+#def socketOpen(socket):
+
+    #log("Socket connected!")
+
+    #skype.OnMessageStatus = parseSkypeMessage
+    #skype.Attach()
+
+    #log("Damonbot is listening attentively..")
+
+#def parseSkypeMessage(message, status):
+    #chatCache[message.ChatName] = message.Chat
+    #socketSend(json.dumps({"body": message.Body, "sender" : { "handle": message.Sender.Handle, "name": message.Sender.FullName }, "chatName": message.ChatName}))
+
+#def socketSend(message):
+    #socket.send(json.dumps(message))
+
+#def socketClose(socket):
+    #log("Socket closed!")
+
+#def socketMessage(socket, message):
+    #parsed = json.loads(message, object_hook=parseNodeMessage)
+
+#def parseNodeMessage(message):
+
+    #log("Handling a command from the server: ")
+
+    ##chatName = message.chatName
+    ##chat = chatCache[chatName]
+    ##chat.SendMessage(message.body)
+
+#try:
+    #socket = websocket.WebSocketApp("ws://localhost:1337", on_message = socketMessage, on_error = socketError, on_close = socketClose)
+#except:
+    #log("Failed to make websocket connection!")
+    #raise
+
+#socket.on_open = socketOpen
+#socket.run_forever()
 
