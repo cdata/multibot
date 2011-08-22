@@ -5,6 +5,8 @@ import websocket
 import json
 import sys
 
+port = argv[1]
+
 def log(message):
     sys.stdout.write('[ PYTHON ] ' + message + '\n');
     sys.stdout.flush();
@@ -45,7 +47,7 @@ class SkypeBridge:
     def receiveSkypeMessage(self, message, status):
 
         if message.Sender != self.skype.CurrentUser:
-            self.sendBridgeMessage({"body" : message.Body, "sender" : { "handle" : message.Sender.Handle, "name" : message.Sender.FullName }, "chatName" : message.ChatName })
+            self.sendBridgeMessage({"text" : message.Body, "chat" : { "id" : message.ChatName, "userCount" : message.Chat.Members.__len__(), "private" : message.Chat.Members.__len__() <= 1 }, "sender" : { "id" : message.Sender.Handle, "name" : message.Sender.FullName }})
 
     def sendSkypeMessage(self, chatName, message):
 
@@ -73,54 +75,4 @@ class SkypeBridge:
                 return chat
 
 bridge = SkypeBridge()
-
-
-#skype = Skype4Py.Skype()
-#chatCache = {}
-
-#def log(message):
-    #sys.stdout.write('[ PYTHON ] ' + message)
-    #sys.stdout.flush()
-
-#def socketError(socket, error):
-    #log(error)
-
-#def socketOpen(socket):
-
-    #log("Socket connected!")
-
-    #skype.OnMessageStatus = parseSkypeMessage
-    #skype.Attach()
-
-    #log("Damonbot is listening attentively..")
-
-#def parseSkypeMessage(message, status):
-    #chatCache[message.ChatName] = message.Chat
-    #socketSend(json.dumps({"body": message.Body, "sender" : { "handle": message.Sender.Handle, "name": message.Sender.FullName }, "chatName": message.ChatName}))
-
-#def socketSend(message):
-    #socket.send(json.dumps(message))
-
-#def socketClose(socket):
-    #log("Socket closed!")
-
-#def socketMessage(socket, message):
-    #parsed = json.loads(message, object_hook=parseNodeMessage)
-
-#def parseNodeMessage(message):
-
-    #log("Handling a command from the server: ")
-
-    ##chatName = message.chatName
-    ##chat = chatCache[chatName]
-    ##chat.SendMessage(message.body)
-
-#try:
-    #socket = websocket.WebSocketApp("ws://localhost:1337", on_message = socketMessage, on_error = socketError, on_close = socketClose)
-#except:
-    #log("Failed to make websocket connection!")
-    #raise
-
-#socket.on_open = socketOpen
-#socket.run_forever()
 

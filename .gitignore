@@ -1,2 +1,5 @@
 .env/
 node_modules
+support/skypekit/skype
+support/skypekit/sdk
+support/skypekit/key.pem
