@@ -24,7 +24,7 @@ You must request a development Application key from Skype. This will allow your 
 
 ## Additional dependencies
 
-Under Ubuntu 11.04, I had to install the following 32-bit libraries through apt in order to get the Skypekit binary to run:
+Under 64-bit Ubuntu Server 11.04, I had to install the following 32-bit libraries through apt in order to get the Skypekit binary to run:
 
     sudo apt-get install lib32asound2 lib32bz2-1.0 lib32gcc1 lib32ncurses5 lib32ncursesw5 lib32stdc++6 lib32v4l-0 lib32z1 libasound2 libc6-i386 libpython2.7 libv4l-0
 
