@@ -4,6 +4,12 @@ I'm a fanboy when it comes to Github's work culture. After reading [this blog po
 
 ## Dependencies
 
+### Skypekit Adapter
+
+See support/skypekit/ABOUT-SKYPEKIT.md
+
+### Skype Adapter
+
 Python dependencies:
 
  - websocket-client
