@@ -5,22 +5,32 @@ import json
 import sys
 import os
 
+def log(message):
+    sys.stdout.write('[ SKYPEKIT ] ' + message + '\n');
+    sys.stdout.flush();
+
+
 sys.path.append(os.path.abspath('./support/skypekit/sdk/ipc/python'))
 sys.path.append(os.path.abspath('./support/skypekit/sdk/interfaces/skype/python'))
 
 try:
+    import skypekit
+except Exception as error:
+    log('Error importing the skypekit module: ' + error.__str__())
+    exit()
+
+try:
     import SkyLib
-except ImportError:
-    raise SystemExit('Program requires SkyLib and skypekit modules')
+except Exception as error:
+    log('Error importing the SkyLib module: ' + error.__str__())
+    exit()
+
+
 
 account = sys.argv[1]
 secret = sys.argv[2]
 port = sys.argv[3]
 
-
-def log(message)
-    sys.stdout.write('[ SKYPEKIT ] ' + message + '\n');
-    sys.stdout.flush();
 
 class SkypekitBridge:
 
@@ -40,8 +50,6 @@ class SkypekitBridge:
         socket.on_open = self.socketOpen
         socket.run_forever()
 
-    def skypeAccountChange(self, propertyName):
-
     def socketError(self, socket, error):
         log(error)
 
@@ -60,7 +68,7 @@ class SkypekitBridge:
 
         def accountChange(self, propertyName):
             if propertyName == 'status':
-                if(self.status == 'LOGGED_IN':
+                if self.status == 'LOGGED_IN':
                     bridge.loggedIn = True
                     log("Skypekit is logged in to Skype..")
 
@@ -78,7 +86,7 @@ class SkypekitBridge:
         if message.author != accountName:
 
             userCount = len(conversation.GetParticipants())
-            self.sendBridgeMessage({ "body" : message.body_xml, "date" : message.timestamp, "chat" : { "id" : message.convo_id, "userCount" : userCount, "private" : userCount <= 1 }, "sender" { "id" : message.author, "name" : message.author_displayname }})
+            self.sendBridgeMessage({ "body" : message.body_xml, "date" : message.timestamp, "chat" : { "id" : message.convo_id, "userCount" : userCount, "private" : userCount <= 1 }, "sender" : { "id" : message.author, "name" : message.author_displayname }})
 
     def sendSkypeMessage(self, chatName, message):
         log("Sending message via Skypekit bridge to chat with ID " + chatName)
@@ -88,7 +96,7 @@ class SkypekitBridge:
 
         log("Handling message received from bridge.")
 
-        def handleData(message)
+        def handleData(message):
             self.sendSkypeMessage(message['chat']['id'], message['text'])
 
         json.loads(message, object_hook=handleData)
