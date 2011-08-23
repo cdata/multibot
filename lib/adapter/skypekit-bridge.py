@@ -9,8 +9,8 @@ def log(message):
     sys.stdout.write(message + '\n');
     sys.stdout.flush();
 
-sys.path.append('/home/chris/repositories/damonbot/support/skypekit/sdk/ipc/python')
-sys.path.append('/home/chris/repositories/damonbot/support/skypekit/sdk/interfaces/skype/python')
+sys.path.append(os.path.abspath('./support/skypekit/sdk/ipc/python'))
+sys.path.append(os.path.abspath('./support/skypekit/sdk/interfaces/skype/python'))
 
 import skypekit
 import SkyLib
