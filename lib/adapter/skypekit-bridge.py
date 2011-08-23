@@ -6,31 +6,18 @@ import sys
 import os
 
 def log(message):
-    sys.stdout.write('[ SKYPEKIT ] ' + message + '\n');
+    sys.stdout.write(message + '\n');
     sys.stdout.flush();
 
+sys.path.append('/home/chris/repositories/damonbot/support/skypekit/sdk/ipc/python')
+sys.path.append('/home/chris/repositories/damonbot/support/skypekit/sdk/interfaces/skype/python')
 
-sys.path.append(os.path.abspath('./support/skypekit/sdk/ipc/python'))
-sys.path.append(os.path.abspath('./support/skypekit/sdk/interfaces/skype/python'))
-
-try:
-    import skypekit
-except Exception as error:
-    log('Error importing the skypekit module: ' + error.__str__())
-    exit()
-
-try:
-    import SkyLib
-except Exception as error:
-    log('Error importing the SkyLib module: ' + error.__str__())
-    exit()
-
-
+import skypekit
+import SkyLib
 
 account = sys.argv[1]
 secret = sys.argv[2]
 port = sys.argv[3]
-
 
 class SkypekitBridge:
 
@@ -53,12 +40,18 @@ class SkypekitBridge:
     def socketError(self, socket, error):
         log(error)
 
+    def socketClose(self, socket):
+        log("Websocket connection closed!")
+
     def socketOpen(self, socket):
         log("Bridge connected!")
 
         bridge = self
 
-        SkyLib.SkyLib.OnMessage = self.receiveSkypeMessage
+        try:
+            SkyLib.SkyLib.OnMessage = self.receiveSkypeMessage
+        except Exception as err:
+            log("Failed to access SkyLib: " + err.__str__())
 
         try:
             self.Skype = SkyLib.GetSkyLib(os.path.abspath('./support/skypekit/key.pem'))
@@ -83,24 +76,28 @@ class SkypekitBridge:
 
     def receiveSkypeMessage(self, message, changesInboxTimestamp, supersedesHistoryMessage, conversation):
 
-        if message.author != accountName:
+        if message.author != account:
 
             userCount = len(conversation.GetParticipants())
-            self.sendBridgeMessage({ "body" : message.body_xml, "date" : message.timestamp, "chat" : { "id" : message.convo_id, "userCount" : userCount, "private" : userCount <= 1 }, "sender" : { "id" : message.author, "name" : message.author_displayname }})
+            self.sendBridgeMessage({ "body" : message.body_xml, "date" : message.timestamp, "chat" : { "id" : conversation.identity, "userCount" : userCount, "private" : userCount <= 1 }, "sender" : { "id" : message.author, "name" : message.author_displayname }})
 
     def sendSkypeMessage(self, chatName, message):
         log("Sending message via Skypekit bridge to chat with ID " + chatName)
-        SkyLib.GetConversationByIdentity(chatName).PostText(message)
+        SkyLib.SkyLib.GetConversationByIdentity(self.Skype, chatName).PostText(message)
 
     def receiveBridgeMessage(self, socket, message):
 
-        log("Handling message received from bridge.")
+        log("Handling message received from bridge: " + message)
 
-        def handleData(message):
-            self.sendSkypeMessage(message['chat']['id'], message['text'])
+        try:
+            data = json.loads(message)
+            self.sendSkypeMessage(data['chat']['id'], data['body'])
+        except Exception as err:
+            log("Failed to parse data received from node: " + err.__str__())
 
-        json.loads(message, object_hook=handleData)
 
     def sendBridgeMessage(self, message):
 
         self.socket.send(json.dumps(message))
+
+bridge = SkypekitBridge()
