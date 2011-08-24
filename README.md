@@ -6,6 +6,8 @@ I'm a fanboy when it comes to Github's work culture. After reading [this blog po
 
 ### Skypekit Adapter
 
+Skypekit is a highly proprietary SDK for Skype third party applications. It is non-free, and non-redistributable, but waaayy more up-to-date and deployable than Skype + Skype4Py from what I can tell. I detailed my experience setting up Skypekit with Damonbot in this repo, if you wish to go this route.
+
 See support/skypekit/ABOUT-SKYPEKIT.md
 
 ### Skype Adapter
