@@ -9,8 +9,8 @@ def log(message):
     sys.stdout.write(message + '\n');
     sys.stdout.flush();
 
-sys.path.append(os.path.abspath('./support/skypekit/sdk/ipc/python'))
-sys.path.append(os.path.abspath('./support/skypekit/sdk/interfaces/skype/python'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../support/skypekit/sdk/ipc/python'))
+sys.path.append(os.path.join(os.path.dirname(__file__), '../../support/skypekit/sdk/interfaces/skype/python'))
 
 import skypekit
 import SkyLib
@@ -54,7 +54,7 @@ class SkypekitBridge:
             log("Failed to access SkyLib: " + err.__str__())
 
         try:
-            self.Skype = SkyLib.GetSkyLib(os.path.abspath('./support/skypekit/key.pem'))
+            self.Skype = SkyLib.GetSkyLib(os.path.join(os.path.dirname(__file__), '../../support/skypekit/key.pem'))
         except Exception:
             log("Failed to create Skypekit instance!")
             raise
